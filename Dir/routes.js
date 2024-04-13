@@ -5,6 +5,7 @@ var _bcrypt = require('bcrypt'); var _bcrypt2 = _interopRequireDefault(_bcrypt);
 var _tokenjs = require('./db/auth/token.js');
 var _verifyTokenjs = require('./db/middlewares/verifyToken.js');
 var _jsonwebtoken = require('jsonwebtoken'); var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
+var _datejs = require('./utils/date.js');
 
 const routes = _express.Router.call(void 0, );
 
@@ -17,7 +18,7 @@ const get_user = async (req) => {
 }
 
 routes.get("/", (req, res) => {
-    res.send("hello world1")
+    res.send("Eu estou vivo")
 })
 
 routes.post("/login", async (req, res) => {
@@ -26,13 +27,13 @@ routes.post("/login", async (req, res) => {
     const user = await _userjs.userModel.findOne({ email }); 
 
     if (!user) {
-        return res.json({ message: "Usuario Não existe" }).status(404)
+        return res.json({ message: "Usuario Não existe" })
     }
 
     const passwordIsValid = await _bcrypt2.default.compare(password, user.password);
     
     if (!passwordIsValid) {
-        return res.json({ message: "Senha Invalida" }).status(404)
+        return res.json({ message: "Senha Invalida" })
     }
 
     return res.json({ token: _tokenjs.generate.call(void 0, user._id) });
@@ -44,6 +45,8 @@ routes.post("/user" , async (req, res) => {
 
     const usernameIsInUse = await _userjs.userModel.findOne({ username });
     const emailIsInUse = await _userjs.userModel.findOne({ email });
+
+    console.log(await _userjs.userModel.find());
 
     if (usernameIsInUse || emailIsInUse) {
         return res.json({ message: "Erro Usuario Ja Cadastrado" })
@@ -62,12 +65,19 @@ routes.post("/task", async (req, res) => {
     const { title, description, priority } = req.body; 
     const user = await get_user(req);
 
+    const IsCreated = await _taskjs.taskModel.findOne({ title, checked: false }); 
+
+    if (IsCreated) { 
+        return res.json({message: "Is Already Created"}); 
+    }
+
     const task = { 
         title, 
         description, 
         checked: false, 
         priority, 
-        owner: user.username 
+        owner: user.username, 
+        date: _datejs.getDateNow.call(void 0, )
     };
 
     await _taskjs.taskModel.create(task);

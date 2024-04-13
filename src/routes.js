@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { generate } from "./db/auth/token.js";
 import { tokenVerification } from "./db/middlewares/verifyToken.js";
 import jwt from 'jsonwebtoken'
+import { getDateNow } from "./utils/date.js";
 
 const routes = Router();
 
@@ -64,12 +65,19 @@ routes.post("/task", async (req, res) => {
     const { title, description, priority } = req.body; 
     const user = await get_user(req);
 
+    const IsCreated = await taskModel.findOne({ title, checked: false }); 
+
+    if (IsCreated) { 
+        return res.json({message: "Is Already Created"}); 
+    }
+
     const task = { 
         title, 
         description, 
         checked: false, 
         priority, 
-        owner: user.username 
+        owner: user.username, 
+        date: getDateNow()
     };
 
     await taskModel.create(task);

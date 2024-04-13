@@ -5,7 +5,8 @@ const taskSchema = new (0, _mongoose.Schema)({
     description: String,
     checked: Boolean,
     priority: String, 
-    owner: String
+    owner: String, 
+    date: String
 }); 
 
 const taskModel = _mongoose.model.call(void 0, 'task', taskSchema); 
